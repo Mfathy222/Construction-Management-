@@ -1,0 +1,202 @@
+<odoo>
+     <record id="construction_contract_view_seacrh" model="ir.ui.view">
+        <field name="name">construction.contract</field>
+        <field name="model">construction.contract</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="partner_id"/>
+                <field name="project_id"/>
+                <group>
+                    <filter string="Confirmed" name="confirmed_contracts_fileter" domain="[('state','=','confirm')]"/>
+                </group>
+                 <group>
+                    <filter string="Project" name="group_project" context="{'group_by':'project_id'}"/>
+                    <filter string="Partner" name="group_partner" context="{'group_by':'partner_id'}"/>
+                    <filter string="Subcontractor Type"
+                            name="group_subcontractor_type"
+                            context="{'group_by':'sub_contractor_type'}"
+                            invisible="context.get('hide_subcontractor_filter',False)"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="construction_contract_view_list" model="ir.ui.view">
+        <field name="name">Contracts</field>
+        <field name="model">construction.contract</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" string="Code"/>
+                <field name="project_id"/>
+                <field name="partner_id"/>
+                <field name="date"/>
+                <field name="from_date"/>
+                <field name="to_date"/>
+                <field name="reference"/>
+                <field name="contract_amount" sum="Total"/>
+            </list>
+        </field>
+    </record>
+    <record id="contract_view_form" model="ir.ui.view">
+        <field name="name">contract.view.form</field>
+        <field name="model">construction.contract</field>
+        <field name="arch" type="xml">
+            <form string="Form Title">
+                 <header>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="create_work_progress" type="object" string="Create Work Progress"  class="btn-primary" invisible="state != 'confirm'"/>
+                    <button name="pay_retention" type="object" string="Pay Retention" class="btn-primary" invisible="accrual_retention_value == 0"/>
+                    <button name="create_down_payment_invoice" type="object" string="Down Payment" class="btn-primary" invisible="already_invoice &gt;= down_payment_value or state == 'draft'"/>
+                    <button name="action_set_to_draft" type="object" string="Set to Draft" class="btn-secondary" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Paid" bg_color="text-bg-success" invisible="contract_payment_state != 'paid'"/>
+                    <widget name="web_ribbon" title="Partially Paid" bg_color="text-bg-info" invisible="contract_payment_state != 'partial'"/>
+                     <div name="button_box"  class="oe_button_box">
+
+                        <button name="open_down_payment_invoice"
+                                class="oe_stat_button"
+                                type="object"
+                                icon="fa-pencil-square-o"
+                                invisible="down_payment_invoice_count == 0">
+                            <field name="already_invoice" string="Down Payments" widget="statinfo"/>
+                        </button>
+
+                         <button name="open_work_progress"  class="oe_stat_button"  type="object"  icon="fa-align-right" invisible="total_work_progresses == 0">
+                            <field name="total_work_progresses"  widget="statinfo" string="Work Progresses"/>
+                         </button>
+
+                         <button name="open_work_items"  type="object" icon="fa-list-ul" invisible="total_work_items == 0">
+                            <field name="total_work_items" string="Work Items" widget="statinfo"/>
+                        </button>
+
+                         <button name="open_contract_wps_payments"  type="object" icon="fa-money" invisible="wps_payments_value == 0">
+                            <field name="wps_payments_value" string="WPS Payments" widget="statinfo"/>
+                        </button>
+
+                         <button name="open_contract_retention_payments"  type="object" icon="fa-thumbs-up" invisible="paid_retention_value == 0">
+                            <field name="paid_retention_value" string="Retention Payments" widget="statinfo"/>
+                        </button>
+
+                    </div>
+                    <div class="oe_title ">
+                        <h1>
+                              <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="General info">
+                            <field name="partner_id" domain="[('company_id','=',company_id)]"/>
+                            <field name="date"/>
+                            <label for="from_date" string="Date Range"/>
+                            <div class="o_row">
+                                <field name="from_date" class="oe_inline"/>
+                                <i class="fa fa-long-arrow-right mx-2" aria-label="Arrow icon" title="Arrow"/>
+                                <field name="to_date" class="oe_inline"/>
+                            </div>
+                            <field name="contract_type" invisible="1"/>
+                            <field name="sub_contractor_type" invisible="contract_type != 'subcontractor'" required="contract_type == 'subcontractor' "/>
+                            <field name="reference"/>
+                        </group>
+                        <group string="Contract Details">
+                            <field name="project_id"/>
+                            <label for="contract_amount" string="Amount"/>
+                            <div class="o_row">
+                            <field name="contract_amount" class="oe_inline"/>
+                            <field name="currency_id" style="width: 22% !important; flex: none !important;" class="oe_inline"/>
+                            <field name="tax_ids" class="oe_inline" widget="many2many_tags" placeholder="Taxes"/>
+                            </div>
+                            <field name="amount_included_tax" string="With Tax Amount" invisible="not tax_ids"/>
+                            <label for="retention_per" string="Retention" />
+                            <div class="oe_row">
+                            <field name="retention_per" widget="percentage"   class="oe_inline"/>
+                            <field name="contract_retention_value" invisible="retention_per == 0"  style="margin-left: 20px !important"  class="oe_inline"/>
+                            </div>
+                            <label for="down_payment_value" string="Down Payment"/>
+                            <div class="oe_row ">
+                                <field name="down_payment_per" widget="percentage"  class="oe_inline"/>
+                                <field name="down_payment_value" invisible="down_payment_per == 0"  style="margin-left: 20px !important"  class="oe_inline"/>
+                                <field name="down_payment_value_include_tax"  invisible="down_payment_per == 0 or not tax_ids"  style="margin-left: 20px !important"  class="oe_inline"/>
+                            </div>
+                            <field name="amount_after_down_payment" string="Net Contract"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Contract Lines" name="contract_lines">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id" domain="[('type','=','service')]" context="{'default_type':'service'}" required="True" string="Work Type"/>
+                                    <field name="description" string="Description"  optional="hide"/>
+                                    <field name="uom" width="150 px"/>
+                                    <field name="price_unit" width="150 px"/>
+                                    <field name="amount" string="Amount" sum="Total Amount" width="200 px"/>
+
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Payments and Retention Return">
+                             <group colspan="2">
+                            <field name="wps_payments_value" string="WPS Payments" invisible="wps_payments_value == 0" help="القيمة المسددة من المستخلصات الحالية" />
+                            <field name="accrual_retention_value" string="Accrual Retention" help="قيمة ضمان الاعمال المستحقة من المستخلصات الحالية "/>
+                            <field name="paid_retention_value" string="Retention Returned" invisible="paid_retention_value == 0" help="قيمة ضمان الأعمال المرتجعة"/>
+                            <field name="remaining_retention_value" string="WPS Remaining Retention" invisible="1"/>
+                            <field name="contract_total_paid" string="Total Payments"/>
+                        </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                 <chatter class="oe_chatter">
+                  <field name="message_follower_ids"/>
+                  <field name="activity_ids"/>
+                  <field name="message_ids"/>
+                </chatter>
+            </form>
+        </field>
+    </record>
+
+    <!--Subcontractor Contract Menu and Action-->
+    <record id="subcontractor_contract_action" model="ir.actions.act_window">
+        <field name="name">Contract</field>
+        <field name="res_model">construction.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('contract_type','=','subcontractor')]</field>
+        <field name="context">{'default_contract_type':'subcontractor'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Contract
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="construction_menu_root_subcontractors_contracts"
+              name="Contracts"
+              action="subcontractor_contract_action"
+              parent="construction_menu_root_subcontractors"
+              sequence="1"
+    />
+
+    <!--Customer Contract Menu and Action-->
+    <record id="customer_contract_action" model="ir.actions.act_window">
+        <field name="name">Contract</field>
+        <field name="res_model">construction.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('contract_type','=','customer')]</field>
+        <field name="context">{'default_contract_type':'customer','hide_subcontractor_filter':True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Contract
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="construction_menu_root_customers_contracts"
+              name="Contracts"
+              action="customer_contract_action"
+              parent="construction_menu_root_customers"
+              sequence="1"
+    />
+</odoo>

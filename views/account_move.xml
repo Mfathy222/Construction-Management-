@@ -1,0 +1,29 @@
+<odoo>
+        <record id="account_move_form_view_inherit_construction" model="ir.ui.view">
+            <field name="name">account.move.form.view.inherit.construction</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="open_contract"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-file-text"
+                            string="Contract"
+                            invisible="not contract_id"
+                    />
+                    <button name="open_work_progress"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-align-right"
+                            string="Work Progress"
+                            invisible="not work_progress_id"
+                    />
+                </xpath>
+                <xpath expr="//form" position="inside">
+                    <field name="work_progress_id" invisible="1"/>
+                </xpath>
+            </field>
+    </record>
+</odoo>
+

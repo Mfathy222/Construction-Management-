@@ -1,0 +1,181 @@
+<odoo>
+
+    <record id="construction_work_progress_view_search" model="ir.ui.view">
+        <field name="name">construction.work.progress</field>
+        <field name="model">construction.work.progress</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="work_progress_no"/>
+                <group>
+                    <filter string="Confirmed" name="confirmed_contracts_filter" domain="[('state','=','confirm')]"/>
+                </group>
+
+                 <group>
+                     <filter string="Contract" name="group_by_contract_id" context="{'group_by':'contract_id'}"/>
+                 </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="construction_work_progress_view_list" model="ir.ui.view">
+        <field name="name">Work Progress</field>
+        <field name="model">construction.work.progress</field>
+        <field name="arch" type="xml">
+            <list  group_create="0" create="0">
+                <field name="display_name" width="60 px" />
+                <field name="contract_id" string="Contract" width="250 px"/>
+                <field name="state" width="120 px"/>
+                <field name="partner_id" width="250 px"/>
+                <field name="wp_value" string="قيمة المستخلص" width="150 px" sum="Total"/>
+                <field name="wp_value_included_tax" string="القيمة شامل الضريبة" width="150 px" sum="Total"/>
+                <field name="retention_per" string="نسبة حجز ضمان أعمال" width="150 px"  widget="percentage" avg="Total" optional="hide"/>
+                <field name="retention_value" string="قيمة حجز ضمان الأعمال" width="150 px" sum="Total"/>
+                <field name="wp_due" string="صافي المستحق" width="150 px" sum="Total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="construction_work_progress_view_form" model="ir.ui.view">
+        <field name="name">work.progress.view.form</field>
+        <field name="model">construction.work.progress</field>
+        <field name="arch" type="xml">
+            <form string="Form Title">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="update_lines" type="object" string="Update Lines"  class="btn-secondary" invisible="state != 'draft'"/>
+                    <button name="action_create_bill"
+                            type="object"
+                            string="Create Bill"
+                            class="btn-primary"
+                            invisible="state != 'confirm' or contract_type !='subcontractor' or invoice_state != 'to_invoice'"
+                    />
+                    <button name="action_create_invoice"
+                            type="object"
+                            string="Create Invoice"
+                            class="btn-primary"
+                            invisible="state != 'confirm' or contract_type !='customer' or invoice_state != 'to_invoice'"
+                    />
+                    <button name="action_set_to_draft" type="object" string="Set to Draft" class="btn-secondary" invisible="state in ['draft','cancel']"/>
+
+                </header>
+                <sheet>
+                   <div name="button_box" class="oe_button_box">
+                        <button name="action_open_bill"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-pencil-square-o"
+                                invisible="invoice_count == 0">
+                            <field name="invoice_count" widget="statinfo" string="Bills"/>
+                        </button>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="work_progress_no" readonly="1" force_save="1" invisible="1"/>
+                            <field name="display_name" string="Code"/>
+                            <field name="date"/>
+                            <field name="partner_id"/>
+                            <field name="contract_id"/>
+                            <field name="work_type" domain="[('id', 'in', work_type_domain_ids)]" options="{'no_create':True,'no_open':True}" />
+                            <field name="project_id"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="total_works_value" string="إجمالي قيمة الأعمال"/>
+                            <field name="total_achieved_value" string="إجمالي الأعمال المنجزة"/>
+                            <field name="last_wp_value" string="إجمالي الأعمال السابقة"/>
+                            <label for="wp_value" string="قيمة المستخلص"/>
+                            <div class="o_row">
+                                <field name="wp_value" class="oe_inline"/>
+                                <field name="tax_ids" class="oe_inline" widget="many2many_tags" placeholder="Select taxes..."/>
+                            </div>
+                            <field name="wp_value_included_tax" string="القيمة شاملة الضريبة" invisible="not tax_ids" force_save="1"/>
+                            <label for="retention_value" string="حجز إلى حين التسليم"/>
+                            <div class="o_row d-flex align-items-center">
+                                <field name="retention_per" widget="percentage" style="width: 15% !important; flex: none !important;"/>
+                                <field name="retention_value"
+                                       placeholder="Amount" style="margin-left: 20px !important"/>
+                            </div>
+                            <field name="wp_due" string="إجمالي المستحق" />
+                        </group>
+                    </group>
+
+                        <notebook>
+                            <page string="Work Progress Lines">
+                                <field name="line_ids">
+                                    <list editable="bottom" delete="0">
+                                        <field name="sequence"  widget="handle"/>
+                                        <field name="work_item_id" width="190px" required="1"
+                                               domain="[('contract_id','=',parent.contract_id),('work_type_id','=',parent.work_type)]"
+                                               options="{'no_quick_create': True}"
+                                               context="{'default_contract_id': parent.contract_id,'default_work_type_id':parent.work_type}"
+                                               string="بند الأعمال"
+                                        />
+                                        <field name="description" optional="hide"  />
+                                        <field name="uom" string="الوحدة" width="70px" required="1"/>
+                                        <field name="price_unit" width="70px" string="سعر الوحدة" />
+                                        <field name="quantity" string="الكمية" width="70px" />
+                                        <field name="subtotal" width="80px" string="قيمة الأعمال" sum="Total" optional="show" />
+                                        <field name="last_works" width="120px" decoration-info="1" string="كمية الأعمال السابقة"/>
+                                        <field name="current_works" width="120px" string="كمية الأعمال الحالية"/>
+                                        <field name="current_value" width="120px" string="قيمة الأعمال الحالية" optional="show" sum="Total"/>
+                                        <field name="total_works" decoration-success="1" width="120px" string="كمية الأعمال المنفذة" optional="show"/>
+                                        <field name="remaining_qty"  width="100px" string="الكمية المتبقية" />
+                                        <field name="progress_per" widget="percentage" width="80px" string="نسبة التنفيذ" optional="show"/>
+                                        <field name="total_value" sum="total" string="قيمة الأعمال المنفذة" width="120px"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+
+
+                </sheet>
+                 <chatter class="oe_chatter">
+                  <field name="message_follower_ids"/>
+                  <field name="activity_ids"/>
+                  <field name="message_ids"/>
+                </chatter>
+            </form>
+        </field>
+    </record>
+
+    <!--Subcontractor Work progress Menu and Action-->
+    <record id="subcontractor_work_progress_action" model="ir.actions.act_window">
+        <field name="name">Work Progress</field>
+        <field name="res_model">construction.work.progress</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('contract_type','=','subcontractor')]</field>
+        <field name="context">{'search_default_group_by_contract_id':1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Work Progress
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="construction_menu_root_subcontractors_work_progress"
+              name="Work Progresses"
+              action="subcontractor_work_progress_action"
+              parent="construction_menu_root_subcontractors"
+              sequence="2"/>
+
+    <!--Customer Work progress and Action-->
+    <record id="customer_work_progress_action" model="ir.actions.act_window">
+        <field name="name">Work Progress</field>
+        <field name="res_model">construction.work.progress</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('contract_type','=','customer')]</field>
+        <field name="context">{'search_default_group_by_contract_id':1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Work Progress
+            </p>
+        </field>
+    </record>
+    <menuitem id="construction_menu_root_customers_work_progress"
+              name="Work Progresses"
+              action="customer_work_progress_action"
+              parent="construction_menu_root_customers"
+              sequence="2"/>
+</odoo>

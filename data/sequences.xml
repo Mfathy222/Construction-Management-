@@ -1,0 +1,20 @@
+<odoo>
+    <data>
+        <record id="construction_contract_subcontractor" model="ir.sequence">
+            <field name="name">SubContractor Contract</field>
+            <field name="code">construction.subcontractor.contract</field>
+            <field name="prefix">C</field>
+            <field name="padding">5</field>
+            <field name="company_id"></field>
+        </record>
+    </data>
+     <data>
+        <record id="construction_contract_customer" model="ir.sequence">
+            <field name="name">Customer Contract</field>
+            <field name="code">construction.customer.contract</field>
+            <field name="prefix">C</field>
+            <field name="padding">5</field>
+            <field name="company_id"></field>
+        </record>
+    </data>
+</odoo>

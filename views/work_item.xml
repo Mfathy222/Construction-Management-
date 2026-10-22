@@ -1,0 +1,49 @@
+<odoo>
+    <record id="work_item_form_view" model="ir.ui.view">
+        <field name="name">construction.work.item.form</field>
+        <field name="model">construction.work.item</field>
+        <field name="arch" type="xml">
+            <form string="Form Title">
+                <header>
+                      <button name="change_price" type="object" string="Change Price" icon="fa-magic" class="btn-primary" invisible="child_id or not has_confirmed_wps or remaining_qty >= quantity" />
+                </header>
+                <sheet>
+                     <div name="button_box"  class="oe_button_box">
+                        <button name="open_parent_work_item" type="object" string="Parent" icon="fa-arrow-circle-up" invisible=" not origin_id"/>
+                        <button name="open_child_work_item" type="object" string="Child" icon="fa-arrow-circle-down" invisible=" not child_id"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="quantity"/>
+                            <field name="change_reason" invisible="not origin_id"/>
+
+                            <field name="contract_id"/>
+<!--                            <field name="work_type_domain_ids"/>-->
+                            <field name="origin_id" string="Parent" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="uom"/>
+                            <field name="price_unit"/>
+                            <field name="item_value"/>
+                            <field name="work_type_id" domain="[('id','in',work_type_domain_ids)]"/>
+
+                            <field name="change_price_date" invisible="not origin_id"/>
+                            <field name="old_price" invisible="not origin_id"/>
+
+
+                            <field name="last_confirmed_line" invisible="1"/>
+                            <field name="remaining_qty" invisible="1" />
+                            <field name="child_id" invisible="1"/>
+                            <field name="has_confirmed_wps" invisible="1"/>
+<!--                            <field name="has_remaining_amount" invisible="1"/>-->
+<!--                            <field name="has_child" invisible="1"/>-->
+                        </group>
+
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

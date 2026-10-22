@@ -1,0 +1,6 @@
+<odoo>
+    <menuitem id="construction_menu_root" name="Construction" sequence="5" web_icon="construction,static/description/icon.png"/>
+    <menuitem id="construction_menu_root_subcontractors" name="Subcontractors" parent="construction_menu_root" sequence="1"/>
+    <menuitem id="construction_menu_root_customers" name="Customers" parent="construction_menu_root" sequence="2"/>
+    <menuitem id="construction_menu_root_configuration" name="Configuration" parent="construction_menu_root" sequence="100"/>
+</odoo>

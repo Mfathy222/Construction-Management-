@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="change_price_wizard" model="ir.ui.view">
+        <field name="name">Pay Retention</field>
+        <field name="model">construction.contract.pay.retention</field>
+        <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="payment_type" readonly="1" widget="radio" options="{'horizontal': true}"/>
+                                <field name="partner_id" required="1" readonly="1"/>
+                                <label for="amount" string="Amount"/>
+                                <div class="o_row">
+                                <field name="amount" class="oe_inline"/>
+                                <field name="currency_id" class="oe_inline" readonly="1"/>
+                                </div>
+                                <field name="contract_id" invisible="1"/>
+                                <field name="date" required="1"/>
+                                <field name="memo" default_focus="1"/>
+                            </group>
+                            <group>
+                                <field name="journal_id" domain="[('type','in',['cash', 'bank'])]" required="True"/>
+                            </group>
+                        </group>
+                        <footer>
+                            <button string="Confirm" type="object" name="action_confirm" class="btn-primary"/>
+                            <button string="Cancel" special="cancel" class="btn-secondary"/>
+                        </footer>
+                    </sheet>
+                </form>
+        </field>
+    </record>
+
+    <record id="action_pay_retention" model="ir.actions.act_window">
+        <field name="name">Pay Retention</field>
+        <field name="res_model">construction.contract.pay.retention</field>
+        <field name="target">new</field>
+        <field name="view_mode">form</field>
+    </record>
+</odoo>

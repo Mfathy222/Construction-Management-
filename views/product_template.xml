@@ -1,0 +1,13 @@
+<odoo>
+    <menuitem id="construction_subcontractor_product_template"
+              name="Work Types"
+              parent="construction_menu_root_subcontractors"
+              action="account.product_product_action_purchasable"
+              sequence="100"/>
+
+    <menuitem id="construction_customer_product_template"
+              name="Work Types"
+              parent="construction_menu_root_customers"
+              action="account.product_product_action_purchasable"
+              sequence="100"/>
+</odoo>

@@ -1,0 +1,377 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- A4 Landscape Paper Format -->
+    <record id="paperformat_work_progress_landscape" model="report.paperformat">
+        <field name="name">Work Progress Landscape</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="orientation">Landscape</field>
+        <field name="page_width">250</field>
+        <field name="page_height">230</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <!-- Report Action -->
+    <record id="construction_work_progress_report" model="ir.actions.report">
+        <field name="name">Work Progress Contract</field>
+        <field name="model">construction.work.progress</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">construction.report_construction_work_progress</field>
+        <field name="report_file">construction.report_construction_work_progress</field>
+        <field name="paperformat_id" ref="construction.paperformat_work_progress_landscape"/>
+        <field name="binding_model_id" ref="model_construction_work_progress"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Work Progress - %s' % (object.display_name or '')</field>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="report_construction_work_progress">
+    
+        <t t-call="web.html_container">
+            <meta charset="utf-8"/>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+            <t t-foreach="docs" t-as="o">
+
+                <main class="page rtl wp-report-page o_report_layout" dir="rtl" lang="ar" style="direction:rtl; unicode-bidi:embed; font-size:13px; padding:0; margin:0; font-family: Arial, sans-serif;">
+                    <div class="page wp-report-page" dir="rtl" lang="ar" style="direction:rtl; unicode-bidi:embed; font-size:13px; padding:0; margin:0;">
+
+                        <!-- Header -->
+                        <table class="wp-header-table" style="width:100%; border-collapse:collapse; table-layout:fixed; direction:rtl; margin-bottom:20px;">
+                            <tr>
+                                <td class="wp-company-cell" style="width:25%; text-align:center; font-size:16px; font-weight:500; padding:0; padding-top:15px; white-space:nowrap; vertical-align:top;">
+                                    <span t-esc="res_company.name or 'شركة ادل الاعمار العقارية'"/>
+                                </td>
+
+                                <td class="wp-header-center" style="width:50%; text-align:start; font-size:14px; font-weight:500; line-height:1.8; padding:0; padding-right:50px; vertical-align:top;">
+                                    <div>
+                                        <span>المشروع / </span>
+                                        <span t-esc="o.project_id.display_name or o.contract_id.display_name or ''"/>
+                                    </div>
+
+                                    <div>
+                                        <span>المقاول / </span>
+                                        <span t-esc="o.partner_id.display_name or ''"/>
+
+                                        <t t-set="partner_no" t-value="o.partner_id.ref or o.partner_id.vat or o.partner_id.phone or ''"/>
+
+                                        <t t-if="partner_no">
+                                            <span> - رقم إقامة / </span>
+                                            <!-- <span t-esc="partner_no"/> -->
+                                        </t>
+                                    </div>
+
+                                    <div>
+                                        <span>الأعمال / </span>
+                                        <span t-esc="o.work_type.display_name or ''"/>
+                                    </div>
+                                </td>
+
+                                <td class="wp-logo-cell" style="width:25%; text-align:left; padding:0; padding-left:20px; vertical-align:top;">
+                                    <img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" class="wp-logo" style="max-height:60px; max-width:180px;"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Body Table -->
+                        <table class="wp-main-table" style="width:100%; border-collapse:collapse; table-layout:fixed; direction:rtl;">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="wp-col-no" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:4%;">رقم البند</th>
+                                    <th rowspan="2" class="wp-col-desc" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:27%;">بيان الأعمال</th>
+                                    <th rowspan="2" class="wp-col-uom" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:7%;">الوحدة</th>
+                                    <th rowspan="2" class="wp-col-price" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:8%;">سعر الوحدة</th>
+                                    <th rowspan="2" class="wp-col-qty" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:8%;">كمية</th>
+                                    <th rowspan="2" class="wp-col-total" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:9%;">الإجمالي</th>
+                                    <th colspan="3" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px;">الأعمال</th>
+                                    <th colspan="2" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px;">إجمالي القيمة</th>
+                                </tr>
+                                <tr>
+                                    <th class="wp-col-work" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:7%;">السابقة</th>
+                                    <th class="wp-col-work" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:7%;">الحالية</th>
+                                    <th class="wp-col-work" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:7%;">الإجمالي</th>
+                                    <th class="wp-col-percent" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:7%;">نسبة الإنجاز</th>
+                                    <th class="wp-col-value" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#eeeeee; font-size:12px; width:9%;">القيمة</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <t t-foreach="o.line_ids.sorted('sequence')" t-as="line">
+                                    <tr>
+                                        <td style="background-color: #eeeeee; border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">
+                                            <span t-esc="line_index + 1"/>
+                                        </td>
+
+                                        <td class="wp-line-desc" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px; text-align:center;">
+                                            <span t-esc="line.description or line.work_item_id.display_name or ''"/>
+                                        </td>
+
+                                        <td style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">
+                                            <span t-esc="line.uom.name or ''"/>
+                                        </td>
+
+                                        <td style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">
+                                            <span t-esc="o.format_wp_report_number(line.price_unit)"/>
+                                        </td>
+
+                                        <td style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">
+                                            <span t-esc="o.format_wp_report_number(line.quantity)"/>
+                                        </td>
+
+                                        <td style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">
+                                            <span t-esc="o.format_wp_report_number(line.subtotal)"/>
+                                        </td>
+
+                                        <td style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">
+                                            <span t-esc="o.format_wp_report_qty(line.last_works)"/>
+                                        </td>
+
+                                        <td style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">
+                                            <span t-esc="o.format_wp_report_qty(line.current_works)"/>
+                                        </td>
+
+                                        <td style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">
+                                            <span t-esc="o.format_wp_report_qty(line.total_works)"/>
+                                        </td>
+
+                                        <td style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">                                        
+                                            <span t-esc="o.format_wp_report_percent(line.progress_per * 100)"/>
+                                        </td>
+
+                                        <td style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;">
+                                            <span t-esc="o.format_wp_report_number(line.total_value)"/>
+                                        </td>
+                                    </tr>
+                                </t>
+
+                                <tr>
+                                    <td colspan="5" class="wp-total-label" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px; font-size:16px; text-align:center;">
+                                    إجمالي قيمة الأعمال
+                                    </td>
+
+                                    <td class="wp-total-cell" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px; font-size:14px;">
+                                        <span t-esc="o.format_wp_report_number(o.total_works_value)"/>
+                                    </td>
+
+                                    <td colspan="4" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px;"/>
+                                    <td class="wp-total-cell" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px; font-size:14px;">
+                                        <span t-esc="o.format_wp_report_number(o.total_achieved_value)"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Notes -->
+                        <div class="wp-section-space">
+                            <table class="wp-notes-table" style="width:100%; border-collapse:collapse; table-layout:fixed; direction:rtl;">
+                                <tr>
+                                    <td class="wp-notes-title" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px; width:28%; text-align:center; white-space:nowrap;">
+                                    شروط خاصة وملاحظات مدير المشروع /
+                                    </td>
+                                    <td class="wp-notes-empty" style="border:1px solid #000000; padding:6px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.35; background-color:#ffffff; font-size:13px; width:72%; height:36px;"/>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Summary Section -->
+                        <div class="wp-section-space">
+                            <table class="wp-summary-layout" style="width:100%; border-collapse:collapse; table-layout:fixed; direction:rtl;">
+                                <tr>
+                                    <!-- Right block -->
+                                    <td class="wp-summary-right-cell" style="width:43%; padding-right:0; vertical-align:top;">
+                                        <table class="wp-summary-info-table" style="width:100%; border-collapse:collapse; table-layout:fixed; direction:rtl;">
+                                            <tr>
+                                                <td class="" colspan="2" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; background-color:#eeeeee; text-align:center; font-size:12px; font-weight:500;">ملخص الأعمال</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="wp-summary-label" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:38%; background-color:#f5f5f5; text-align:right; padding-right:8px;">المشروع</td>
+                                                <td class="wp-summary-value" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:62%; text-align:right; padding-right:8px;">
+                                                    <span t-esc="o.project_id.display_name or ''"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="wp-summary-label" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:38%; background-color:#f5f5f5; text-align:right; padding-right:8px;">تاريخ المستخلص</td>
+                                                <td class="wp-summary-value" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:62%; text-align:right; padding-right:8px;">
+                                                    <span t-esc="o.date or ''"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="wp-summary-label" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:38%; background-color:#f5f5f5; text-align:right; padding-right:8px;">رقم المستخلص</td>
+                                                <td class="wp-summary-value" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:62%; text-align:right; padding-right:8px;">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="wp-summary-label" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:38%; background-color:#f5f5f5; text-align:right; padding-right:8px;">التحويل على الحساب</td>
+                                                <td class="wp-summary-value" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:62%; text-align:right; padding-right:8px;">
+                                                    <!-- <span t-esc="o.transfer_account or ''"/> -->
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="wp-summary-label" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:38%; background-color:#f5f5f5; text-align:right; padding-right:8px;">توقيع المقاول</td>
+                                                <td class="wp-summary-value" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:62%; text-align:right; padding-right:8px;">
+                                                    <!-- <span t-esc="o.contractor_signature or ''"/> -->
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="wp-summary-label" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; width:38%; background-color:#f5f5f5; text-align:right; padding-right:8px;">ملاحظة</td>
+                                                <td class="wp-summary-note" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; height:45px; text-align:right; vertical-align:top; padding-right:8px;">
+                                                    <!-- <span t-esc="o.note or ''"/> -->
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+
+                                    <!-- Left block -->
+                                    <td class="wp-summary-left-cell" style="width:57%; vertical-align:top;">
+                                        <table class="wp-payment-table" style="width:100%; border-collapse:collapse; table-layout:fixed; direction:rtl;">
+                                            <tr>
+                                                <th class="pay-method-col" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#eeeeee; font-size:12px; width:22%;">طريقة تسليم الدفعة</th>
+                                                <th class="pay-desc-col" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#eeeeee; font-size:12px; width:48%;">الوصف</th>
+                                                <th class="pay-value-col" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#eeeeee; font-size:12px; width:30%;">القيمة بالريال</th>
+                                            </tr>
+
+                                            <tr>
+                                                <td class="pay-method-cell " rowspan="6" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; vertical-align:top; padding-top:20px;">
+                                                    <div class="wp-payment-option" style="text-align:right; font-size:15px; margin-bottom:2px;">
+                                                        <span>كاش</span>
+                                                        <span class="wp-check-char" style="font-size:18px; margin-right:15px;">
+                                                            <t>□</t>
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="wp-payment-option" style="text-align:right; font-size:15px; margin-bottom:2px;">
+                                                        <span>شيك</span>
+                                                        <span class="wp-check-char" style="font-size:18px; margin-right:15px;">
+                                                            <t>□</t>
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="wp-payment-option" style="text-align:right; font-size:15px; margin-bottom:2px;">
+                                                        <span>تحويل</span>
+                                                        <span class="wp-check-char" style="font-size:18px; margin-right:6px;">
+                                                            <t>□</t>
+                                                        </span>
+                                                    </div>
+                                                </td>
+
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">قيمة الأعمال المنجزة</td>
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">
+                                                    <span t-esc="o.format_wp_report_number(o.total_achieved_value)"/>
+                                                </td>
+                                            </tr>
+
+                                            <tr t-if="o.last_wp_value">
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">
+                                                    <span>خصم قيمة الأعمال المنفذة مستخلص رقم </span>
+                                                    <span t-esc="o.previous_work_progress_no()"/>
+                                                </td>
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">
+                                                    <span t-esc="o.format_wp_report_number(o.last_wp_value)"/>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">
+                                                    <span>قيمة الأعمال المنفذة حتى تاريخه مستخلص رقم </span>
+                                                    <span t-esc="o.work_progress_no or ''"/>
+                                                </td>
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">
+                                                    <span t-esc="o.format_wp_report_number(o.wp_value)"/>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">
+                                                    <span>حجز إلى حين التسليم </span>
+                                                    <span t-esc="o.format_wp_report_percent(o.retention_per)"/>
+                                                </td>
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">
+                                                    <span t-esc="o.format_wp_report_number(o.retention_value)"/>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">
+                                            المتبقى
+                                            المستحق
+                                            للمقاول
+                                                </td>
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff;">
+                                                    <span t-esc="o.format_wp_report_number(o.wp_due)"/>
+                                                </td>
+                                            </tr>
+
+                                            <tr class="wp-approved-row">
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px;">قيمة الدفعة المعتمدة من قبل المدير التنفيذي</td>
+                                                <td style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; background-color:#92d050;">
+                                                    <span t-esc="o.format_wp_report_number(o.wp_due)"/>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td colspan="3" class="wp-amount-words" style="border:1px solid #000000; padding:2px 4px; text-align:center; vertical-align:middle; font-weight:500; line-height:1.50; font-size:11px; background-color:#ffffff; text-align:right; font-size:11px; padding:3px 4px; line-height:1.50;">
+                                                    <strong style="padding-right: 10px;">الإجمالي بالحروف:</strong>
+                                                    <span style="padding-right:11px;" t-esc="o.env.company.currency_id.with_context(lang='ar_001').amount_to_text(o.wp_due)"/>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Approvals -->
+                        <table class="wp-approvals-table" style="width:100%; border-collapse:collapse; table-layout:fixed; direction:rtl; margin-top:12px;">
+                            <tr>
+                                <th style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; background-color:#ffffff; font-size:13px; height:28px;">اعتماد المكتب الفني</th>
+                                <th style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; background-color:#ffffff; font-size:13px; height:28px;">اعتماد مدير التشطيبات</th>
+                                <th style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; background-color:#ffffff; font-size:13px; height:28px;">اعتماد المدير المشروع</th>
+                                <th style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; background-color:#ffffff; font-size:13px; height:28px;">اعتماد الحسابات</th>
+                                <th style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; background-color:#ffffff; font-size:13px; height:28px;">اعتماد المراجعة</th>
+                                <th style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; background-color:#ffffff; font-size:13px; height:28px;">اعتماد المدير المالي والإداري</th>
+                                <th style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; background-color:#ffffff; font-size:13px; height:28px;">الاعتماد</th>
+                            </tr>
+                            <tr>
+                                <td class="wp-approval-body" style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; height:78px; text-align:right; font-size:10px; line-height:2; vertical-align:top;">
+                                    <div>الاسم / </div>
+                                    <div>التوقيع /</div>
+                                </td>
+                                <td class="wp-approval-body" style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; height:78px; text-align:right; font-size:10px; line-height:2; vertical-align:top;">
+                                    <div>الاسم / </div>
+                                    <div>التوقيع /</div>
+                                </td>
+                                <td class="wp-approval-body" style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; height:78px; text-align:right; font-size:10px; line-height:2; vertical-align:top;">
+                                    <div>الاسم / </div>
+                                    <div>التوقيع /</div>
+                                </td>
+                                <td class="wp-approval-body" style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; height:78px; text-align:right; font-size:10px; line-height:2; vertical-align:top;">
+                                    <div>الاسم /</div>
+                                    <div>التوقيع /</div>
+                                </td>
+                                <td class="wp-approval-body" style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; height:78px; text-align:right; font-size:10px; line-height:2; vertical-align:top;">
+                                    <div>الاسم /</div>
+                                    <div>التوقيع /</div>
+                                </td>
+                                <td class="wp-approval-body" style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; height:78px; text-align:right; font-size:10px; line-height:2; vertical-align:top;">
+                                    <div>الاسم /</div>
+                                    <div>التوقيع /</div>
+                                </td>
+                                <td class="wp-approval-body" style="border:2px dashed #000000; padding:6px; font-weight:500; text-align:center; vertical-align:top; height:78px; text-align:right; font-size:10px; line-height:2; vertical-align:top;">
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </main>
+            </t>
+        </t>
+    </template>
+
+</odoo>
